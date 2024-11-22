@@ -11,7 +11,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (isset($_GET['country'])) {
   $country = $_GET['country'];
-  $stmt = $conn->prepare("SELECT * FROM countries WHERE name LIKE ?");
+  $stmt = $conn->prepare("SELECT name, continent, independence_year, head_of_state FROM countries WHERE name LIKE ?");
   $stmt->execute(["%$country%"]);
   $results = $stmt->fetchAll();
   foreach ($results as $row) {
@@ -19,22 +19,30 @@ if (isset($_GET['country'])) {
   }
 }
 
-echo "<table>
-        <tr>
-            <th>Country</th>
-            <th>Continent</th>
-            <th>Year of Independence</th>
-            <th>Head of State</th>
-        </tr>";
-foreach ($results as $row) {
-    echo "<tr>
-            <td>{$row['name']}</td>
-            <td>{$row['continent']}</td>
-            <td>{$row['independence_year']}</td>
-            <td>{$row['head_of_state']}</td>
-        </tr>";
+if (count($results) > 0) {
+  echo "<table>
+          <thead>
+              <tr>
+                  <th>Country</th>
+                  <th>Continent</th>
+                  <th>Year of Independence</th>
+                  <th>Head of State</th>
+              </tr>
+          </thead>
+          <tbody>";
+  foreach ($results as $row) {
+      echo "<tr>
+              <td>{$row['name']}</td>
+              <td>{$row['continent']}</td>
+              <td>{$row['independence_year']}</td>
+              <td>{$row['head_of_state']}</td>
+          </tr>";
+  }
+  echo "</tbody>
+      </table>";
+} else {
+  echo "No results found.";
 }
-echo "</table>";
 
 if ($_GET['lookup'] === 'cities') {
   $stmt = $conn->prepare("SELECT cities.name, cities.district, cities.population
