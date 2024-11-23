@@ -44,31 +44,39 @@ if (count($results) > 0) {
   echo "No results found.";
 }
 
-if ($_GET['lookup'] === 'cities') {
-  $stmt = $conn->prepare("SELECT cities.name, cities.district, cities.population
-                          FROM cities JOIN countries ON cities.country_code = countries.code
-                          WHERE countries.name LIKE ?");
+if (isset($_GET['lookup']) && $_GET['lookup'] === 'cities' && isset($_GET['country'])) {
+  $country = $_GET['country'];
+  $stmt = $conn->prepare(
+      "SELECT cities.name, cities.district, cities.population 
+       FROM cities 
+       JOIN countries ON cities.country_code = countries.code 
+       WHERE countries.name LIKE ?"
+  );
   $stmt->execute(["%$country%"]);
   $results = $stmt->fetchAll();
-  echo "<table>
-          <tr>
-              <th>City</th>
-              <th>District</th>
-              <th>Population</th>
-          </tr>";
-  foreach ($results as $row) {
-      echo "<tr>
-              <td>{$row['name']}</td>
-              <td>{$row['district']}</td>
-              <td>{$row['population']}</td>
-          </tr>";
+  
+  if (count($results) > 0) {
+      echo "<table>
+              <thead>
+                  <tr>
+                      <th>City</th>
+                      <th>District</th>
+                      <th>Population</th>
+                  </tr>
+              </thead>
+              <tbody>";
+      foreach ($results as $row) {
+          echo "<tr>
+                  <td>{$row['name']}</td>
+                  <td>{$row['district']}</td>
+                  <td>{$row['population']}</td>
+              </tr>";
+      }
+      echo "</tbody>
+          </table>";
+  } else {
+      echo "No cities found for this country.";
   }
-  echo "</table>";
 }
 
 ?>
-<ul>
-<?php foreach ($results as $row): ?>
-  <li><?= $row['name'] . ' is ruled by ' . $row['head_of_state']; ?></li>
-<?php endforeach; ?>
-</ul>
